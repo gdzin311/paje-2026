@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+      * {
+            overflow: hidden;
+            margin: 0;
+        }
+    </style>
+
+    <script src="./script/Entidade.js"></script>
+    <script src="./script/player.js"></script>
+    <script src="./script/Actions.js"></script>
+    <script src="./script/Inimigo.js"></script>
+    <script src="./script/Menu.js"></script>
+</head>
+</head>
+<body>
+    
+    <canvas id="canvas"></canvas>
+    <script>
+        let canvas = document.getElementById("canvas");
+        let ctx = canvas.getContext("2d");
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
+        let ataqueImg=  "./imgs/ataque.png"
+
+        let FPS = 30;
+        let keys = [];
+        let input= {
+            direita: 68,
+            esquerda: 65,
+            pulo: 32,
+            atk_direita: 39,
+            atk_esquerda: 37,
+            atk_cima: 38,
+            atk_baixo: 40
+        }
+        let player;
+        let enemy;
+        let chao;
+        let menu;
+        let dificuldade= null;
+
+        
+        chao= new Entidade(0, canvas.height*0.9, canvas.width, canvas.height*0.1);
+        menu= new Menu()
+
+        game= setInterval(gameMenu, 1000/30);
+
+        function gameMenu() {
+            menu.update();
+            menu.draw();
+        }
+
+        function loop()
+        {   
+            ctx.fillStyle= "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            chao.draw();
+            player.update();
+            enemy.update();
+            player.draw();
+            enemy.draw();
+        }
+
+        //game over--------------------------
+
+        let timerBackground = 0;
+        let positionUpperText = 0;
+        let secondTimerBackground = 0;
+        let scoreTimer = 0;
+        let mockScore = 0;
+        let retryTimer = 0;
+        function deathScreen() {
+            ctx.fillStyle = "rgba(0,0,0," + timerBackground / 100 + ")";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "bold 70px arial";
+            ctx.fillStyle = "red";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            if (timerBackground < 10) {
+                timerBackground += 0.25;
+            } else {
+                timerBackground = 100;
+                positionUpperText += 4;
+                ctx.fillText("GAME OVER", canvas.width / 2, Math.min(canvas.height / 2 - 25, positionUpperText));
+                ctx.fillStyle = "white";
+                if (positionUpperText >= canvas.height / 2 - 25) {
+                    if (secondTimerBackground < FPS) {
+                        secondTimerBackground++;
+                    } else {
+                        if (scoreTimer < 10 && mockScore < player.enemiesKilled) {
+                            scoreTimer++;
+                        } else {
+                            mockScore += 8;
+                        }
+                        retryTimer= 100;
+                        ctx.fillStyle = "rgba(255,255,255," + retryTimer / 100 + ")";
+                        ctx.fillText("Jogar novamente?", canvas.width / 2, canvas.height / 2 + 150);
+                        if (retryTimer >= 100 && keys[13]) {
+                            window.location.reload();
+                        }
+                    }
+                }
+            }
+        }
+
+        //teclado ------------------------
+
+        document.addEventListener("keydown", keyDown);
+        document.addEventListener("keyup", keyUp);
+
+        function keyDown(event)
+        { 
+            if (menu && menu.remapping)
+            {
+                input[menu.remapping] = event.keyCode; 
+                menu.remapping = null;                  
+                menu.changeButtonsControls(); 
+            }
+            keys[event.keyCode] = true;
+            console.log(event.keyCode);
+        }
+        function keyUp(event)
+        {   keys[event.keyCode] = false;
+        }
+
+
+    </script>
+
+</body>
+</html>
